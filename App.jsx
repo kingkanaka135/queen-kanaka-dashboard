@@ -112,6 +112,7 @@ export default function Queen() {
   // Connected accounts (handle is just a label; real access needs each platform's own sign-in)
   const [connected, setConnected] = useState({});
   const [handles, setHandles] = useState({});
+  const [activeTab, setActiveTab] = useState("console");
 
   const totalRevenue = TRANSACTIONS.filter((t) => t.type === "in").reduce((s, t) => s + t.amount, 0);
   const totalExpenses = EXPENSE_BREAKDOWN.reduce((s, e) => s + e.value, 0);
@@ -182,7 +183,7 @@ export default function Queen() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
+          model: "claude-sonnet-5",
           max_tokens: 500,
           messages: [
             {
@@ -218,7 +219,7 @@ export default function Queen() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
+          model: "claude-sonnet-5",
           max_tokens: 1000,
           messages: [
             {
@@ -283,13 +284,17 @@ export default function Queen() {
 
         <nav style={styles.nav}>
           {[
-            { icon: Sparkles, label: "Command Console", active: true },
-            { icon: TrendingUp, label: "Growth & Revenue" },
-            { icon: Landmark, label: "Treasury" },
-            { icon: Radio, label: "Campaign Queue" },
-            { icon: Link2, label: "Connected Accounts" },
+            { id: "console", icon: Sparkles, label: "Command Console" },
+            { id: "growth", icon: TrendingUp, label: "Growth & Revenue" },
+            { id: "treasury", icon: Landmark, label: "Treasury" },
+            { id: "queue", icon: Radio, label: "Campaign Queue" },
+            { id: "accounts", icon: Link2, label: "Connected Accounts" },
           ].map((n) => (
-            <div key={n.label} style={{ ...styles.navItem, ...(n.active ? styles.navItemActive : {}) }}>
+            <div
+              key={n.id}
+              onClick={() => setActiveTab(n.id)}
+              style={{ ...styles.navItem, ...(activeTab === n.id ? styles.navItemActive : {}), cursor: "pointer" }}
+            >
               <n.icon size={16} />
               <span>{n.label}</span>
             </div>
@@ -334,6 +339,7 @@ export default function Queen() {
         </header>
 
         {/* Command Console */}
+        {activeTab === "console" && (
         <section style={styles.console}>
           <div className="qz-scroll" style={styles.consoleHistory}>
             {messages.map((m, i) => (
@@ -377,8 +383,10 @@ export default function Queen() {
           </div>
           {error && <div style={styles.errorText}>{error}</div>}
         </section>
+        )}
 
         {/* Metrics */}
+        {activeTab === "growth" && (
         <section style={styles.metricsGrid}>
           {METRICS.map((m) => (
             <div key={m.label} style={styles.metricCard}>
@@ -388,8 +396,10 @@ export default function Queen() {
             </div>
           ))}
         </section>
+        )}
 
         {/* Treasury */}
+        {activeTab === "treasury" && (
         <section style={styles.card}>
           <div style={styles.cardHead}>
             <Landmark size={16} color="#C9A44C" />
@@ -479,9 +489,11 @@ export default function Queen() {
             Illustrative figures for now. Once Queen's connected to your ad accounts and payment platforms, this fills in with your real numbers automatically.
           </div>
         </section>
+        )}
 
+        {/* Content Studio */}
+        {activeTab === "console" && (
         <section style={styles.columns}>
-          {/* Content Studio */}
           <div style={styles.card}>
             <div style={styles.cardHead}>
               <Sparkles size={16} color="#C9A44C" />
@@ -541,31 +553,35 @@ export default function Queen() {
               ))}
             </div>
           </div>
+        </section>
+        )}
 
-          {/* Campaign Queue */}
-          <div style={styles.card}>
-            <div style={styles.cardHead}>
-              <Radio size={16} color="#C9A44C" />
-              <span style={styles.cardTitle}>Campaign Queue</span>
-            </div>
-            <div style={styles.queueList}>
-              {QUEUE.map((q) => (
-                <div key={q.title} style={styles.queueItem}>
-                  <div style={styles.queueDot} />
-                  <div style={{ flex: 1 }}>
-                    <div style={styles.queueTitle}>{q.title}</div>
-                    <div style={styles.queueMeta}>{q.channel} · {q.time}</div>
-                  </div>
+        {/* Campaign Queue */}
+        {activeTab === "queue" && (
+        <section style={styles.card}>
+          <div style={styles.cardHead}>
+            <Radio size={16} color="#C9A44C" />
+            <span style={styles.cardTitle}>Campaign Queue</span>
+          </div>
+          <div style={styles.queueList}>
+            {QUEUE.map((q) => (
+              <div key={q.title} style={styles.queueItem}>
+                <div style={styles.queueDot} />
+                <div style={{ flex: 1 }}>
+                  <div style={styles.queueTitle}>{q.title}</div>
+                  <div style={styles.queueMeta}>{q.channel} · {q.time}</div>
                 </div>
-              ))}
-            </div>
-            <div style={styles.queueFootnote}>
-              Illustrative queue. Connect a platform below to schedule real posts.
-            </div>
+              </div>
+            ))}
+          </div>
+          <div style={styles.queueFootnote}>
+            Illustrative queue. Connect a platform below to schedule real posts.
           </div>
         </section>
+        )}
 
         {/* Connected Accounts */}
+        {activeTab === "accounts" && (
         <section style={styles.card}>
           <div style={styles.cardHead}>
             <Link2 size={16} color="#C9A44C" />
@@ -600,6 +616,7 @@ export default function Queen() {
             Typing a handle here just labels the account for planning — it doesn't give Queen access. Real posting, editing, and monetization control requires signing in directly through each platform's own secure login (Instagram, YouTube, TikTok) and granting permission there. No app — including this one — can act on your account from a username alone; that's what keeps it yours. Ready when you are to set up real sign-in.
           </div>
         </section>
+        )}
 
         <footer style={styles.footer}>
           <Crown size={13} color="#C9A44C" />
