@@ -113,6 +113,19 @@ export default function Queen() {
   const [connected, setConnected] = useState({});
   const [handles, setHandles] = useState({});
   const [activeTab, setActiveTab] = useState("console");
+  const sectionRefs = {
+    console: useRef(null),
+    growth: useRef(null),
+    treasury: useRef(null),
+    queue: useRef(null),
+    accounts: useRef(null),
+  };
+
+  function goToTab(id) {
+    setActiveTab(id);
+    const el = sectionRefs[id].current;
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   const totalRevenue = TRANSACTIONS.filter((t) => t.type === "in").reduce((s, t) => s + t.amount, 0);
   const totalExpenses = EXPENSE_BREAKDOWN.reduce((s, e) => s + e.value, 0);
@@ -292,7 +305,7 @@ export default function Queen() {
           ].map((n) => (
             <div
               key={n.id}
-              onClick={() => setActiveTab(n.id)}
+              onClick={() => goToTab(n.id)}
               style={{ ...styles.navItem, ...(activeTab === n.id ? styles.navItemActive : {}), cursor: "pointer" }}
             >
               <n.icon size={16} />
@@ -339,8 +352,10 @@ export default function Queen() {
         </header>
 
         {/* Command Console */}
-        {activeTab === "console" && (
-        <section style={styles.console}>
+        <section
+          ref={sectionRefs.console}
+          style={{ ...styles.console, ...(activeTab === "console" ? styles.sectionHighlight : {}) }}
+        >
           <div className="qz-scroll" style={styles.consoleHistory}>
             {messages.map((m, i) => (
               <div key={i} style={{ ...styles.bubbleRow, justifyContent: m.role === "king" ? "flex-end" : "flex-start" }}>
@@ -383,11 +398,12 @@ export default function Queen() {
           </div>
           {error && <div style={styles.errorText}>{error}</div>}
         </section>
-        )}
 
         {/* Metrics */}
-        {activeTab === "growth" && (
-        <section style={styles.metricsGrid}>
+        <section
+          ref={sectionRefs.growth}
+          style={{ ...styles.metricsGrid, ...(activeTab === "growth" ? styles.sectionHighlightGrid : {}) }}
+        >
           {METRICS.map((m) => (
             <div key={m.label} style={styles.metricCard}>
               <div style={styles.metricLabel}>{m.label}</div>
@@ -396,11 +412,12 @@ export default function Queen() {
             </div>
           ))}
         </section>
-        )}
 
         {/* Treasury */}
-        {activeTab === "treasury" && (
-        <section style={styles.card}>
+        <section
+          ref={sectionRefs.treasury}
+          style={{ ...styles.card, ...(activeTab === "treasury" ? styles.sectionHighlight : {}) }}
+        >
           <div style={styles.cardHead}>
             <Landmark size={16} color="#C9A44C" />
             <span style={styles.cardTitle}>Treasury</span>
@@ -489,10 +506,8 @@ export default function Queen() {
             Illustrative figures for now. Once Queen's connected to your ad accounts and payment platforms, this fills in with your real numbers automatically.
           </div>
         </section>
-        )}
 
         {/* Content Studio */}
-        {activeTab === "console" && (
         <section style={styles.columns}>
           <div style={styles.card}>
             <div style={styles.cardHead}>
@@ -554,11 +569,12 @@ export default function Queen() {
             </div>
           </div>
         </section>
-        )}
 
         {/* Campaign Queue */}
-        {activeTab === "queue" && (
-        <section style={styles.card}>
+        <section
+          ref={sectionRefs.queue}
+          style={{ ...styles.card, ...(activeTab === "queue" ? styles.sectionHighlight : {}) }}
+        >
           <div style={styles.cardHead}>
             <Radio size={16} color="#C9A44C" />
             <span style={styles.cardTitle}>Campaign Queue</span>
@@ -578,11 +594,12 @@ export default function Queen() {
             Illustrative queue. Connect a platform below to schedule real posts.
           </div>
         </section>
-        )}
 
         {/* Connected Accounts */}
-        {activeTab === "accounts" && (
-        <section style={styles.card}>
+        <section
+          ref={sectionRefs.accounts}
+          style={{ ...styles.card, ...(activeTab === "accounts" ? styles.sectionHighlight : {}) }}
+        >
           <div style={styles.cardHead}>
             <Link2 size={16} color="#C9A44C" />
             <span style={styles.cardTitle}>Connected Accounts</span>
@@ -616,7 +633,6 @@ export default function Queen() {
             Typing a handle here just labels the account for planning — it doesn't give Queen access. Real posting, editing, and monetization control requires signing in directly through each platform's own secure login (Instagram, YouTube, TikTok) and granting permission there. No app — including this one — can act on your account from a username alone; that's what keeps it yours. Ready when you are to set up real sign-in.
           </div>
         </section>
-        )}
 
         <footer style={styles.footer}>
           <Crown size={13} color="#C9A44C" />
@@ -786,4 +802,17 @@ const styles = {
     fontSize: 12, color: "#8A8378", letterSpacing: 0.3,
   },
   footerName: { color: "#E8D9B5", fontFamily: "'Cormorant Garamond', serif", fontWeight: 600, letterSpacing: 1 },
+  sectionHighlight: {
+    outline: "2px solid #C9A44C",
+    outlineOffset: "3px",
+    boxShadow: "0 0 24px 2px rgba(201,164,76,0.25)",
+    transition: "box-shadow 0.4s ease",
+  },
+  sectionHighlightGrid: {
+    outline: "2px solid #C9A44C",
+    outlineOffset: "6px",
+    borderRadius: 14,
+    boxShadow: "0 0 24px 2px rgba(201,164,76,0.25)",
+    transition: "box-shadow 0.4s ease",
+  },
 };
